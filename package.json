@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI-powered language learning tutor with voice support",
   "private": true,
+  "type": "module",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
