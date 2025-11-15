@@ -1,29 +1,35 @@
-export default async (req, context) => {
+import fetch from 'node-fetch';
+
+export const handler = async (event, context) => {
   // Only allow POST requests
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
   }
 
   try {
-    const body = await req.json();
-    const { prompt } = body;
+    const { prompt } = JSON.parse(event.body);
 
     if (!prompt) {
-      return new Response(
-        JSON.stringify({ error: 'Prompt is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Prompt is required' })
+      };
     }
 
     // Get API key from environment variable
-    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
-
+    const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
+    
     if (!apiKey) {
       console.error('API key not configured');
-      return new Response(
-        JSON.stringify({ error: 'API key not configured. Please set ANTHROPIC_API_KEY in Netlify environment variables.' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'API key not configured' })
+      };
     }
 
     // Call Anthropic API
@@ -67,26 +73,24 @@ export default async (req, context) => {
 
     const data = await response.json();
 
-    return new Response(
-      JSON.stringify(data),
-      { 
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      }
-    );
+    return {
+      statusCode: 200,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify(data)
+    };
 
   } catch (error) {
     console.error('Function error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      })
+    };
   }
-};
-
-export const config = {
-  path: '/api/chat'
 };
