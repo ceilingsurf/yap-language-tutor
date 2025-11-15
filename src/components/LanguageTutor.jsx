@@ -430,8 +430,14 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get response');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMsg = errorData.error || 'Failed to get response from AI';
+        const details = errorData.details || '';
+        const statusCode = errorData.status || response.status;
+
+        throw new Error(
+          `${errorMsg}${details ? ` (${details})` : ''} [Status: ${statusCode}]`
+        );
       }
 
       const data = await response.json();

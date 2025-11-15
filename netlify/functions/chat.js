@@ -41,7 +41,7 @@ export const handler = async (event, context) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -50,14 +50,25 @@ export const handler = async (event, context) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Anthropic API error:', response.status, errorText);
-      return {
-        statusCode: response.status,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          error: 'Failed to get response from AI',
-          details: response.status === 401 ? 'Invalid API key' : `Status ${response.status}`
-        })
-      };
+
+      // Try to parse error for better message
+      let errorMessage = 'Failed to get response from AI';
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error?.message || errorMessage;
+      } catch (e) {
+        // If can't parse, use the text
+        errorMessage = errorText || errorMessage;
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: errorMessage,
+          status: response.status,
+          details: 'Check Netlify function logs for more information'
+        }),
+        { status: response.status, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();

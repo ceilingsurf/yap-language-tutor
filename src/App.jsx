@@ -2,6 +2,8 @@ import React from 'react';
 import { useAuth } from './context/AuthContext';
 import Auth from './components/Auth';
 import LanguageTutor from './components/LanguageTutor';
+import OfflineIndicator from './components/OfflineIndicator';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 const App = () => {
   const { user, loading } = useAuth();
@@ -17,7 +19,13 @@ const App = () => {
     );
   }
 
-  return user ? <LanguageTutor /> : <Auth />;
+  return (
+    <>
+      {user ? <LanguageTutor /> : <Auth />}
+      <OfflineIndicator />
+      <PWAInstallPrompt />
+    </>
+  );
 };
 
 export default App;
