@@ -16,12 +16,12 @@ export default async (req, context) => {
     }
 
     // Get API key from environment variable
-    const apiKey = Netlify.env.get('VITE_ANTHROPIC_API_KEY');
-    
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
+
     if (!apiKey) {
       console.error('API key not configured');
       return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
+        JSON.stringify({ error: 'API key not configured. Please set ANTHROPIC_API_KEY in Netlify environment variables.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
