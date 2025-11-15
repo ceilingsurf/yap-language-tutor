@@ -251,27 +251,21 @@ Respond with a JSON object in this exact format:
 
 Your entire response MUST be valid JSON only. DO NOT include any text outside the JSON structure.`;
 
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || localStorage.getItem('anthropic_api_key');
-      
-      if (!apiKey) {
-        throw new Error('API key not configured. Please add your Anthropic API key.');
-      }
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01"
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        })
+        body: JSON.stringify({ prompt })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get response');
+      }
+
       const data = await response.json();
+      
       const content = data.content.find(item => item.type === "text")?.text || "";
       
       let cleanedContent = content.trim();
