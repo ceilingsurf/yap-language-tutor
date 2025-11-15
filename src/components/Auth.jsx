@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -40,10 +40,12 @@ const Auth = () => {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
         {/* Logo and Title */}
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-blue-600 p-3 rounded-full mb-4">
-            <BookOpen className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800">YAP Language Tutor</h1>
+          <img
+            src="/logo.png"
+            alt="YAP Logo"
+            className="h-20 w-20 mb-4 object-contain"
+          />
+          <h1 className="text-3xl font-bold text-gray-800">Language Tutor</h1>
           <p className="text-gray-600 mt-2">
             {isLogin ? 'Welcome back!' : 'Start your learning journey'}
           </p>

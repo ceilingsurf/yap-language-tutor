@@ -606,8 +606,12 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-                <h1 className="text-xl font-bold text-gray-800">YAP Language Tutor</h1>
+                <img
+                  src="/logo.png"
+                  alt="YAP Logo"
+                  className="h-8 w-8 object-contain"
+                />
+                <h1 className="text-xl font-bold text-gray-800">Language Tutor</h1>
               </div>
               
               <select 
