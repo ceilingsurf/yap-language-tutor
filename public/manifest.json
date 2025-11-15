@@ -1,0 +1,49 @@
+{
+  "name": "YAP Language Tutor",
+  "short_name": "YAP Tutor",
+  "description": "AI-powered language learning tutor with voice support, vocabulary tracking, and flashcards",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Start Practice",
+      "short_name": "Practice",
+      "description": "Start a new language practice session",
+      "url": "/",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Vocabulary",
+      "short_name": "Vocab",
+      "description": "Review your vocabulary",
+      "url": "/?view=vocabulary",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Flashcards",
+      "short_name": "Cards",
+      "description": "Practice with flashcards",
+      "url": "/?view=flashcards",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
