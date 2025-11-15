@@ -121,8 +121,61 @@ The app uses Anthropic's Claude API for AI-powered language tutoring. The API ca
 - Check that auth callbacks are properly configured
 
 ### API Errors
-- Verify Anthropic API key is set in Netlify environment variables
-- Check API usage limits
+
+#### "Failed to get response from AI"
+
+This error indicates an issue with the Anthropic API integration. Common causes:
+
+**1. Missing or Invalid API Key**
+- **Netlify**: Go to Site settings > Environment variables
+- Add `ANTHROPIC_API_KEY` with your key from https://console.anthropic.com
+- Redeploy the site after adding the environment variable
+
+**2. API Key Not Found (Status 401)**
+- Error: "invalid x-api-key"
+- Solution: Check that your API key is correct and active
+
+**3. Model Not Available (Status 404)**
+- Error: "model not found"
+- Solution: The app now uses `claude-3-5-sonnet-20241022` (latest stable model)
+- If this fails, check Anthropic's status page
+
+**4. Rate Limiting (Status 429)**
+- Error: "rate limit exceeded"
+- Solution: Wait a few minutes or upgrade your Anthropic plan
+
+**5. Insufficient Credits (Status 402)**
+- Error: "insufficient credits"
+- Solution: Add credits to your Anthropic account
+
+**How to Get an Anthropic API Key:**
+1. Go to https://console.anthropic.com
+2. Sign up or log in
+3. Navigate to API Keys section
+4. Create a new API key
+5. Copy the key (it won't be shown again!)
+6. Add to Netlify environment variables as `ANTHROPIC_API_KEY`
+
+**Testing Your API Key:**
+```bash
+# Test with curl (replace YOUR_API_KEY)
+curl https://api.anthropic.com/v1/messages \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-3-5-sonnet-20241022",
+    "max_tokens": 10,
+    "messages": [{"role": "user", "content": "Hi"}]
+  }'
+```
+
+**Checking Netlify Logs:**
+1. Go to Netlify dashboard
+2. Click on your site
+3. Go to Functions tab
+4. Click on "chat" function
+5. View logs to see detailed error messages
 
 ## Future Enhancements
 
