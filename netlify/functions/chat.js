@@ -37,67 +37,103 @@ export const handler = async (event, context) => {
 
     console.log('API key found, calling Anthropic API...');
 
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    // Add timeout to prevent function hanging (20 seconds)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 20000);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Anthropic API error:', response.status, errorText);
+    try {
+      // Call Anthropic API
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        }),
+        signal: controller.signal
+      });
 
-      // Try to parse error for better message
-      let errorMessage = 'Failed to get response from AI';
-      try {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.error?.message || errorData.error?.type || errorMessage;
-      } catch (e) {
-        // If can't parse, use the text
-        errorMessage = errorText || errorMessage;
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Anthropic API error:', response.status, errorText);
+
+        // Try to parse error for better message
+        let errorMessage = 'Failed to get response from AI';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error?.message || errorData.error?.type || errorMessage;
+        } catch (e) {
+          // If can't parse, use the text
+          errorMessage = errorText || errorMessage;
+        }
+
+        return {
+          statusCode: response.status,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: errorMessage,
+            status: response.status,
+            details: 'Check Netlify function logs for more information'
+          })
+        };
       }
 
+      console.log('Anthropic API response OK, parsing...');
+
+      const data = await response.json();
+
       return {
-        statusCode: response.status,
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(data)
+      };
+
+    } catch (fetchError) {
+      clearTimeout(timeout);
+
+      if (fetchError.name === 'AbortError') {
+        console.error('Request timeout after 20 seconds');
+        return {
+          statusCode: 504,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: 'Request timed out',
+            details: 'The AI service took too long to respond. Please try again.'
+          })
+        };
+      }
+
+      console.error('Fetch error:', fetchError.message);
+      return {
+        statusCode: 502,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          error: errorMessage,
-          status: response.status,
-          details: 'Check Netlify function logs for more information'
+          error: 'Network error connecting to AI service',
+          details: fetchError.message
         })
       };
     }
 
-    console.log('Anthropic API response OK, parsing...');
-
-    const data = await response.json();
-
-    return {
-      statusCode: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(data)
-    };
-
   } catch (error) {
-    console.error('Function error:', error);
+    console.error('Function error:', error.message, error.stack);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Internal server error',
-        message: error.message 
+        message: error.message
       })
     };
   }
