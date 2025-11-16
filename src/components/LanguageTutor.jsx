@@ -400,6 +400,12 @@ User's proficiency level: ${detectedLevel}
 Learning goals: ${learningGoals.map(g => g.text).join(', ')}
 Lesson mode: ${showLessonMode}
 
+IMPORTANT: In the "newVocabulary" array, include 2-5 important/useful words or phrases from your response that would be valuable for the learner to save and practice. Focus on:
+- Key vocabulary related to the conversation topic
+- Useful everyday phrases
+- Words that match their proficiency level
+- Words they might struggle with or should practice
+
 Respond with a JSON object in this exact format:
 {
   "tutorResponse": "Your encouraging response in ${languages[selectedLanguage].name}. ${showLessonMode ? 'Focus on teaching specific grammar or vocabulary.' : 'Keep the conversation natural and flowing.'}",
@@ -416,6 +422,15 @@ Respond with a JSON object in this exact format:
     "improvements": ["Areas to work on"]
   },
   "vocabularyUsed": ["words", "they", "used"],
+  "newVocabulary": [
+    {
+      "word": "word in ${languages[selectedLanguage].name}",
+      "translation": "English translation",
+      "category": "verbs|nouns|adjectives|phrases|other",
+      "example_sentence": "Example sentence using this word in ${languages[selectedLanguage].name}",
+      "example_translation": "English translation of the example"
+    }
+  ],
   "progressNotes": "Brief encouraging note about their progress"
 }
 
@@ -479,6 +494,53 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
             });
         } catch (error) {
           console.error('Error saving tutor message:', error);
+        }
+      }
+
+      // Save new vocabulary to Supabase
+      if (user && parsedResponse.newVocabulary && Array.isArray(parsedResponse.newVocabulary)) {
+        try {
+          // Only save vocabulary items that have all required fields
+          const validVocabulary = parsedResponse.newVocabulary.filter(
+            vocab => vocab.word && vocab.translation
+          );
+
+          if (validVocabulary.length > 0) {
+            // Check which words already exist to avoid duplicates
+            const { data: existingWords } = await supabase
+              .from('vocabulary_words')
+              .select('word')
+              .eq('user_id', user.id)
+              .eq('language', selectedLanguage)
+              .in('word', validVocabulary.map(v => v.word));
+
+            const existingWordSet = new Set(existingWords?.map(w => w.word) || []);
+
+            // Filter out words that already exist
+            const newWords = validVocabulary.filter(v => !existingWordSet.has(v.word));
+
+            if (newWords.length > 0) {
+              const vocabularyEntries = newWords.map(vocab => ({
+                user_id: user.id,
+                language: selectedLanguage,
+                word: vocab.word,
+                translation: vocab.translation,
+                category: vocab.category || 'other',
+                example_sentence: vocab.example_sentence || null,
+                example_translation: vocab.example_translation || null,
+                mastery_level: 0,
+                times_reviewed: 0
+              }));
+
+              await supabase
+                .from('vocabulary_words')
+                .insert(vocabularyEntries);
+
+              console.log(`Saved ${newWords.length} new vocabulary words to database`);
+            }
+          }
+        } catch (error) {
+          console.error('Error saving vocabulary:', error);
         }
       }
 
