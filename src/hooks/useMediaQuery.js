@@ -13,15 +13,24 @@ export const BREAKPOINTS = {
  * @returns {boolean} - Whether the media query matches
  */
 export const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => {
+    // Initialize with the actual value if window is available
+    if (typeof window !== 'undefined') {
+      return window.matchMedia(query).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
+    // Ensure window is available
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const media = window.matchMedia(query);
 
     // Set initial value
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
+    setMatches(media.matches);
 
     // Listen for changes
     const listener = (e) => setMatches(e.matches);
@@ -35,7 +44,7 @@ export const useMediaQuery = (query) => {
       media.addListener(listener);
       return () => media.removeListener(listener);
     }
-  }, [matches, query]);
+  }, [query]); // Only re-run when query changes, not when matches changes
 
   return matches;
 };
