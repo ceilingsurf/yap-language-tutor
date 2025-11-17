@@ -700,19 +700,22 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
     trackMouse: false
   });
 
-  // Handler for swiping on tutor messages to show translation
-  const createMessageSwipeHandler = (messageId) => {
-    return useSwipeable({
-      onSwipedLeft: () => {
+  // Single handler for swiping on tutor messages to show translation
+  // Using data attributes to identify which message was swiped
+  const messageSwipeHandler = useSwipeable({
+    onSwipedLeft: (eventData) => {
+      const messageElement = eventData.event.target.closest('[data-message-id]');
+      if (messageElement) {
+        const messageId = parseInt(messageElement.getAttribute('data-message-id'));
         setSwipedMessageId(messageId);
         toggleMessageTranslation(messageId);
         setTimeout(() => setSwipedMessageId(null), 300);
-      },
-      preventDefaultTouchmoveEvent: true,
-      trackMouse: false,
-      delta: 50
-    });
-  };
+      }
+    },
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: false,
+    delta: 50
+  });
 
   const getThemeIcon = () => {
     if (themeMode === 'dark') return <Moon className="h-4 w-4" />;
@@ -893,11 +896,11 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
           )}
 
           {messages.map((message) => {
-            const messageSwipeHandlers = message.sender === 'tutor' ? createMessageSwipeHandler(message.id) : {};
             return (
             <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                {...messageSwipeHandlers}
+                {...(message.sender === 'tutor' ? messageSwipeHandler : {})}
+                data-message-id={message.sender === 'tutor' ? message.id : undefined}
                 className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2.5 md:py-2 rounded-lg relative group ${
                   swipedMessageId === message.id ? 'swipe-feedback' : ''
                 } ${
