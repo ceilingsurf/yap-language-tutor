@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 const Auth = () => {
@@ -12,6 +13,7 @@ const Auth = () => {
   const [message, setMessage] = useState('');
 
   const { signIn, signUp } = useAuth();
+  const { isDark } = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +38,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${
+      isDark ? 'bg-gradient-to-br from-dark-bg to-dark-surface' : 'bg-gradient-to-br from-blue-50 to-indigo-100'
+    }`}>
+      <div className={`rounded-lg shadow-xl w-full max-w-md p-8 ${isDark ? 'bg-dark-surface' : 'bg-white'}`}>
         {/* Logo and Title */}
         <div className="flex flex-col items-center mb-8">
           <img
@@ -45,8 +49,8 @@ const Auth = () => {
             alt="YAP Logo"
             className="h-20 w-20 mb-4 object-contain"
           />
-          <h1 className="text-3xl font-bold text-gray-800">Language Tutor</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className={`text-3xl font-bold ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>Language Tutor</h1>
+          <p className={`mt-2 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
             {isLogin ? 'Welcome back!' : 'Start your learning journey'}
           </p>
         </div>
@@ -70,16 +74,18 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <User className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    isDark ? 'bg-dark-bg border-dark-border text-dark-text' : 'border-gray-300 bg-white'
+                  }`}
                   placeholder="John Doe"
                   required
                 />
@@ -88,16 +94,18 @@ const Auth = () => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  isDark ? 'bg-dark-bg border-dark-border text-dark-text' : 'border-gray-300 bg-white'
+                }`}
                 placeholder="you@example.com"
                 required
               />
@@ -105,16 +113,18 @@ const Auth = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  isDark ? 'bg-dark-bg border-dark-border text-dark-text' : 'border-gray-300 bg-white'
+                }`}
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -148,9 +158,9 @@ const Auth = () => {
         </div>
 
         {/* Features */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center mb-3">What you'll get:</p>
-          <ul className="space-y-2 text-sm text-gray-600">
+        <div className={`mt-8 pt-6 border-t ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
+          <p className={`text-xs text-center mb-3 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>What you'll get:</p>
+          <ul className={`space-y-2 text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
             <li className="flex items-center">
               <span className="text-green-500 mr-2">✓</span>
               AI-powered language tutoring

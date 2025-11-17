@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, BookOpen, Target, TrendingUp, MessageSquare, CheckCircle, BarChart3, Languages, Mic, Volume2, Pause, LogOut, Library, Menu } from 'lucide-react';
+import { Send, BookOpen, Target, TrendingUp, MessageSquare, CheckCircle, BarChart3, Languages, Mic, Volume2, Pause, LogOut, Library, Menu, Moon, Sun, Monitor } from 'lucide-react';
+import { useSwipeable } from 'react-swipeable';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../supabaseClient';
 import VocabularyTab from './VocabularyTab';
 import FlashcardTab from './FlashcardTab';
@@ -10,6 +12,7 @@ import { useIsMobile, useIsTablet, useIsDesktop } from '../hooks/useMediaQuery';
 
 const LanguageTutor = () => {
   const { user, signOut } = useAuth();
+  const { themeMode, setTheme, isDark } = useTheme();
 
   // Responsive hooks
   const isMobile = useIsMobile();
@@ -36,9 +39,9 @@ const LanguageTutor = () => {
     sessionCount: 0
   });
   const [learningGoals, setLearningGoals] = useState([
-    { id: 1, text: 'Master basic greetings', completed: false, progress: 20 },
+    { id: 1, text: 'Master basic greetings and introductions', completed: false, progress: 20 },
     { id: 2, text: 'Learn present tense verbs', completed: false, progress: 10 },
-    { id: 3, text: 'Expand food vocabulary', completed: false, progress: 0 }
+    { id: 3, text: 'Expand food and drink vocabulary', completed: false, progress: 0 }
   ]);
   const [feedback, setFeedback] = useState(null);
   const [showLessonMode, setShowLessonMode] = useState(false);
@@ -50,6 +53,7 @@ const LanguageTutor = () => {
     grammarAccuracy: [60, 65, 70, 75, 80],
     conversationLength: [5, 8, 12, 15, 18]
   });
+  const [swipedMessageId, setSwipedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -347,6 +351,13 @@ const LanguageTutor = () => {
           'Build everyday vocabulary',
           'Practice German pronunciation',
           'Learn basic sentence structure'
+        ],
+        italian: [
+          'Master basic Italian greetings (Ciao, Buongiorno, Come stai?)',
+          'Learn present tense verbs (essere, avere, fare)',
+          'Build Italian food and cuisine vocabulary',
+          'Practice Italian pronunciation and gestures',
+          'Use basic question words (che, come, dove, quando)'
         ]
       }
     };
@@ -675,12 +686,53 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
     }
   };
 
+  // Swipe handlers for tab navigation
+  const tabSwipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (activeView === 'chat') setActiveView('vocabulary');
+      else if (activeView === 'vocabulary') setActiveView('flashcards');
+    },
+    onSwipedRight: () => {
+      if (activeView === 'flashcards') setActiveView('vocabulary');
+      else if (activeView === 'vocabulary') setActiveView('chat');
+    },
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: false
+  });
+
+  // Handler for swiping on tutor messages to show translation
+  const createMessageSwipeHandler = (messageId) => {
+    return useSwipeable({
+      onSwipedLeft: () => {
+        setSwipedMessageId(messageId);
+        toggleMessageTranslation(messageId);
+        setTimeout(() => setSwipedMessageId(null), 300);
+      },
+      preventDefaultTouchmoveEvent: true,
+      trackMouse: false,
+      delta: 50
+    });
+  };
+
+  const getThemeIcon = () => {
+    if (themeMode === 'dark') return <Moon className="h-4 w-4" />;
+    if (themeMode === 'light') return <Sun className="h-4 w-4" />;
+    return <Monitor className="h-4 w-4" />;
+  };
+
+  const cycleTheme = () => {
+    const modes = ['auto', 'light', 'dark'];
+    const currentIndex = modes.indexOf(themeMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    setTheme(modes[nextIndex]);
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className={`flex h-screen ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`} {...tabSwipeHandlers}>
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col pb-16 md:pb-0">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-3 md:p-4 safe-area-pt">
+        <div className={`${isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'} border-b p-3 md:p-4 safe-area-pt`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
               <div className="flex items-center space-x-2">
@@ -689,14 +741,16 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                   alt="YAP Logo"
                   className="h-6 w-6 md:h-8 md:w-8 object-contain flex-shrink-0"
                 />
-                <h1 className="text-base md:text-xl font-bold text-gray-800 hidden sm:block">Language Tutor</h1>
-                <h1 className="text-base font-bold text-gray-800 sm:hidden">YAP</h1>
+                <h1 className={`text-base md:text-xl font-bold hidden sm:block ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>Language Tutor</h1>
+                <h1 className={`text-base font-bold sm:hidden ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>YAP</h1>
               </div>
 
               <select
                 value={selectedLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm max-w-[140px] md:max-w-none"
+                className={`px-2 py-1 md:px-3 md:py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm max-w-[140px] md:max-w-none ${
+                  isDark ? 'bg-dark-bg border-dark-border text-dark-text' : 'border-gray-300 bg-white text-gray-900'
+                }`}
               >
                 {Object.entries(languages).map(([code, lang]) => (
                   <option key={code} value={code}>
@@ -719,7 +773,9 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                   className={`px-3 md:px-4 py-1.5 md:py-2 rounded-md text-xs md:text-sm font-medium transition-colors ${
                     showLessonMode
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : isDark
+                        ? 'bg-dark-border text-dark-text hover:bg-dark-accent hover:text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
                   {showLessonMode ? 'Lesson' : 'Chat'}
@@ -735,10 +791,26 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                 </button>
               )}
               <button
+                onClick={cycleTheme}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 ${
+                  isDark
+                    ? 'bg-dark-border text-dark-text hover:bg-dark-accent hover:text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                title={`Theme: ${themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}`}
+              >
+                {getThemeIcon()}
+                <span className="capitalize">{themeMode}</span>
+              </button>
+              <button
                 onClick={async () => {
                   await signOut();
                 }}
-                className="px-2 md:px-3 py-1.5 md:py-2 rounded-md text-xs md:text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors flex items-center space-x-1"
+                className={`px-2 md:px-3 py-1.5 md:py-2 rounded-md text-xs md:text-sm font-medium transition-colors flex items-center space-x-1 ${
+                  isDark
+                    ? 'bg-dark-border text-dark-text hover:bg-dark-accent hover:text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />
@@ -748,13 +820,13 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
           </div>
 
           {/* Tab Navigation - Hidden on mobile, shown on tablet+ */}
-          <div className="hidden md:flex border-t border-gray-200 mt-4 -mb-4 -mx-4 px-4">
+          <div className={`hidden md:flex border-t mt-4 -mb-4 -mx-4 px-4 ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
             <button
               onClick={() => setActiveView('chat')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeView === 'chat'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
+                  ? isDark ? 'border-dark-accent text-dark-accent' : 'border-blue-600 text-blue-600'
+                  : isDark ? 'border-transparent text-dark-text-secondary hover:text-dark-text' : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -766,8 +838,8 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               onClick={() => setActiveView('vocabulary')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeView === 'vocabulary'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
+                  ? isDark ? 'border-dark-accent text-dark-accent' : 'border-blue-600 text-blue-600'
+                  : isDark ? 'border-transparent text-dark-text-secondary hover:text-dark-text' : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -779,8 +851,8 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               onClick={() => setActiveView('flashcards')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeView === 'flashcards'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
+                  ? isDark ? 'border-dark-accent text-dark-accent' : 'border-blue-600 text-blue-600'
+                  : isDark ? 'border-transparent text-dark-text-secondary hover:text-dark-text' : 'border-transparent text-gray-600 hover:text-gray-800'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -803,26 +875,34 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
           {messages.length === 0 && (
             <div className="text-center py-6 md:py-8 px-4">
               <div className="text-4xl md:text-5xl mb-4">{languages[selectedLanguage].flag}</div>
-              <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">
+              <h2 className={`text-lg md:text-xl font-semibold mb-2 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
                 Ready to practice {languages[selectedLanguage].name}?
               </h2>
-              <p className="text-sm md:text-base text-gray-500 mb-4">
+              <p className={`text-sm md:text-base mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>
                 Start a conversation and I'll help you learn with personalized feedback!
               </p>
-              <div className="flex items-center justify-center space-x-2 text-xs md:text-sm text-gray-600">
+              <div className={`flex items-center justify-center space-x-2 text-xs md:text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
                 <Mic className="h-4 w-4" />
-                <span>Click the microphone to speak</span>
+                <span>Click the microphone to speak or swipe between tabs</span>
               </div>
             </div>
           )}
 
-          {messages.map((message) => (
+          {messages.map((message) => {
+            const messageSwipeHandlers = message.sender === 'tutor' ? createMessageSwipeHandler(message.id) : {};
+            return (
             <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2.5 md:py-2 rounded-lg relative group ${
-                message.sender === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors'
-              }`}>
+              <div
+                {...messageSwipeHandlers}
+                className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2.5 md:py-2 rounded-lg relative group ${
+                  swipedMessageId === message.id ? 'swipe-feedback' : ''
+                } ${
+                  message.sender === 'user'
+                    ? 'bg-blue-600 text-white'
+                    : isDark
+                      ? 'bg-dark-surface border border-dark-border text-dark-text hover:bg-dark-bg transition-colors'
+                      : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors'
+                }`}>
                 {message.sender === 'tutor' && (
                   <div className="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -830,9 +910,10 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                         e.stopPropagation();
                         toggleMessageTranslation(message.id);
                       }}
-                      className="p-1 hover:bg-gray-100 rounded"
+                      className={`p-1 rounded ${isDark ? 'hover:bg-dark-border' : 'hover:bg-gray-100'}`}
+                      title="Swipe left or click to translate"
                     >
-                      <Languages className="h-3 w-3 text-gray-400" />
+                      <Languages className={`h-3 w-3 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
                     </button>
                     <button
                       onClick={(e) => {
@@ -843,12 +924,12 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                           speakText(message.text, message.id);
                         }
                       }}
-                      className="p-1 hover:bg-gray-100 rounded"
+                      className={`p-1 rounded ${isDark ? 'hover:bg-dark-border' : 'hover:bg-gray-100'}`}
                     >
                       {isSpeaking && speakingMessageId === message.id ? (
                         <Pause className="h-3 w-3 text-blue-600" />
                       ) : (
-                        <Volume2 className="h-3 w-3 text-gray-400" />
+                        <Volume2 className={`h-3 w-3 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
                       )}
                     </button>
                   </div>
@@ -860,29 +941,32 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                   }
                 </p>
                 {message.sender === 'tutor' && translatedMessages.has(message.id) && (
-                  <p className="text-xs mt-1 text-gray-500 italic">
+                  <p className={`text-xs mt-1 italic ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>
                     English translation
                   </p>
                 )}
                 <p className={`text-xs mt-1.5 md:mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                  message.sender === 'user'
+                    ? 'text-blue-100'
+                    : isDark ? 'text-dark-text-secondary' : 'text-gray-500'
                 }`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
+              <div className={`rounded-lg px-4 py-2 ${isDark ? 'bg-dark-surface border border-dark-border' : 'bg-white border border-gray-200'}`}>
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-dark-text-secondary' : 'bg-gray-400'}`}></div>
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-dark-text-secondary' : 'bg-gray-400'}`} style={{animationDelay: '0.1s'}}></div>
+                    <div className={`w-2 h-2 rounded-full animate-bounce ${isDark ? 'bg-dark-text-secondary' : 'bg-gray-400'}`} style={{animationDelay: '0.2s'}}></div>
                   </div>
-                  <span className="text-sm text-gray-500">Tutor is thinking...</span>
+                  <span className={`text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>Tutor is thinking...</span>
                 </div>
               </div>
             </div>
@@ -891,7 +975,7 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         </div>
 
         {/* Input Area */}
-        <div className="bg-white border-t border-gray-200 p-3 md:p-4 safe-area-pb">
+        <div className={`border-t p-3 md:p-4 safe-area-pb ${isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'}`}>
           {/* Full-screen listening mode on mobile */}
           {isListening && isMobile && (
             <div className="fixed inset-0 bg-blue-600 z-50 flex flex-col items-center justify-center">
@@ -920,7 +1004,9 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               className={`p-3 md:p-3 rounded-md transition-colors flex-shrink-0 ${
                 isListening
                   ? 'bg-red-500 text-white animate-pulse'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
+                  : isDark
+                    ? 'bg-dark-border text-dark-text hover:bg-dark-accent hover:text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
               } disabled:opacity-50 disabled:cursor-not-allowed ${
                 isMobile ? 'w-14 h-14 rounded-full' : ''
               }`}
@@ -935,7 +1021,11 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               onChange={(e) => setCurrentMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder={isMobile ? 'Type message...' : `Type your message in ${languages[selectedLanguage].name}...`}
-              className="flex-1 px-3 md:px-4 py-2 md:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`flex-1 px-3 md:px-4 py-2 md:py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+              }`}
               disabled={isLoading || isListening}
             />
             <button
@@ -962,16 +1052,16 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
 
       {/* Sidebar - Only show in chat mode on desktop */}
       {activeView === 'chat' && isDesktop && (
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col overflow-y-auto">
+        <div className={`w-80 border-l flex flex-col overflow-y-auto ${isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'}`}>
         {/* Voice Settings */}
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+        <div className={`p-4 border-b ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
+          <h3 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
             <Volume2 className="h-5 w-5 mr-2" />
             Voice Settings
           </h3>
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-gray-600 mb-1 block">
+              <label className={`text-sm mb-1 block ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
                 Speaking Speed: {voiceSettings.rate.toFixed(1)}x
               </label>
               <input
@@ -985,7 +1075,7 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-600">Auto-play responses</label>
+              <label className={`text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>Auto-play responses</label>
               <button
                 onClick={() => setVoiceSettings(prev => ({ ...prev, autoPlay: !prev.autoPlay }))}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -1003,56 +1093,60 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         </div>
 
         {/* Progress Overview */}
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+        <div className={`p-4 border-b ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
+          <h3 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
             <TrendingUp className="h-5 w-5 mr-2" />
             Progress Overview
           </h3>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+            <div className={`flex justify-between text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
               <span>Messages:</span>
-              <span className="font-medium">{userProfile.totalMessages}</span>
+              <span className={`font-medium ${isDark ? 'text-dark-text' : 'text-gray-900'}`}>{userProfile.totalMessages}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className={`flex justify-between text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
               <span>Vocabulary:</span>
-              <span className="font-medium">{userProfile.vocabularyCount.size} words</span>
+              <span className={`font-medium ${isDark ? 'text-dark-text' : 'text-gray-900'}`}>{userProfile.vocabularyCount.size} words</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className={`flex justify-between text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
               <span>Accuracy:</span>
-              <span className="font-medium">{userProfile.grammarAccuracy}%</span>
+              <span className={`font-medium ${isDark ? 'text-dark-text' : 'text-gray-900'}`}>{userProfile.grammarAccuracy}%</span>
             </div>
           </div>
         </div>
 
         {/* Learning Goals */}
-        <div className="p-4 border-b border-gray-200">
+        <div className={`p-4 border-b ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-800 flex items-center">
+            <h3 className={`font-semibold flex items-center ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
               <Target className="h-5 w-5 mr-2" />
               Learning Goals
             </h3>
             <button
               onClick={addCustomGoal}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className={`text-sm font-medium ${isDark ? 'text-dark-accent hover:text-dark-primary' : 'text-blue-600 hover:text-blue-700'}`}
             >
               + Add
             </button>
           </div>
           <div className="space-y-2">
             {learningGoals.map((goal) => (
-              <div key={goal.id} className="p-2 bg-gray-50 rounded-md">
+              <div key={goal.id} className={`p-2 rounded-md ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className={`text-sm ${goal.completed ? 'line-through text-gray-500' : 'text-gray-700'}`}>
+                    <p className={`text-sm ${goal.completed ? 'line-through' : ''} ${
+                      goal.completed
+                        ? isDark ? 'text-dark-text-secondary' : 'text-gray-500'
+                        : isDark ? 'text-dark-text' : 'text-gray-700'
+                    }`}>
                       {goal.text}
                     </p>
                     <div className="mt-1">
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                      <div className={`flex items-center justify-between text-xs mb-1 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>
                         <span>Progress</span>
                         <span>{goal.progress}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                      <div className={`w-full rounded-full h-2 ${isDark ? 'bg-dark-border' : 'bg-gray-200'}`}>
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${goal.progress}%` }}
                         ></div>
@@ -1066,7 +1160,7 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                     {goal.completed ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
-                      <div className="h-4 w-4 border-2 border-gray-300 rounded-full"></div>
+                      <div className={`h-4 w-4 border-2 rounded-full ${isDark ? 'border-dark-border' : 'border-gray-300'}`}></div>
                     )}
                   </button>
                 </div>
@@ -1077,8 +1171,8 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
 
         {/* Real-time Feedback */}
         {feedback && (
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+          <div className={`p-4 border-b ${isDark ? 'border-dark-border' : 'border-gray-200'}`}>
+            <h3 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
               <MessageSquare className="h-5 w-5 mr-2" />
               Feedback
             </h3>
@@ -1117,13 +1211,13 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
 
         {/* Quick Stats */}
         <div className="flex-1 p-4">
-          <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+          <h3 className={`font-semibold mb-3 flex items-center ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
             <BarChart3 className="h-5 w-5 mr-2" />
             Learning Stats
           </h3>
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Vocabulary Growth</p>
+              <p className={`text-sm mb-1 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>Vocabulary Growth</p>
               <div className="flex items-end space-x-1 h-8">
                 {progressStats.vocabularyGrowth.slice(-5).map((value, idx) => (
                   <div
@@ -1135,7 +1229,7 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Grammar Accuracy</p>
+              <p className={`text-sm mb-1 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>Grammar Accuracy</p>
               <div className="flex items-end space-x-1 h-8">
                 {progressStats.grammarAccuracy.slice(-5).map((value, idx) => (
                   <div
