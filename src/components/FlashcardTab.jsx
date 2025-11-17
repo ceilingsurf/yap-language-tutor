@@ -158,27 +158,27 @@ const FlashcardTab = ({ language }) => {
 
   if (showResults || vocabularyWords.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-3 md:p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 max-w-md w-full text-center">
           {vocabularyWords.length === 0 ? (
             <>
-              <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-800 mb-2">No Cards to Review</h3>
-              <p className="text-gray-600 mb-6">
+              <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-2">No Cards to Review</h3>
+              <p className="text-sm md:text-base text-gray-600 mb-6">
                 You're all caught up! Add more vocabulary words or come back later when cards are due for review.
               </p>
               <button
                 onClick={resetSession}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-6 py-2.5 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 transition-colors"
               >
                 Refresh
               </button>
             </>
           ) : (
             <>
-              <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Session Complete!</h3>
-              <p className="text-gray-600 mb-6">Great job reviewing your vocabulary!</p>
+              <Trophy className="h-12 w-12 md:h-16 md:w-16 text-yellow-500 mx-auto mb-4" />
+              <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Session Complete!</h3>
+              <p className="text-sm md:text-base text-gray-600 mb-6">Great job reviewing your vocabulary!</p>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
@@ -201,7 +201,7 @@ const FlashcardTab = ({ language }) => {
 
               <button
                 onClick={resetSession}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center space-x-2"
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 flex items-center justify-center space-x-2 transition-colors text-base"
               >
                 <RotateCcw className="h-5 w-5" />
                 <span>Start New Session</span>
@@ -216,16 +216,16 @@ const FlashcardTab = ({ language }) => {
   const currentCard = vocabularyWords[currentCardIndex];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-3 md:p-4">
       {/* Progress Bar */}
-      <div className="w-full max-w-2xl mb-6">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
-          <span>Progress</span>
-          <span>{sessionStats.reviewed} / {sessionStats.total}</span>
+      <div className="w-full max-w-2xl mb-4 md:mb-6 px-2">
+        <div className="flex justify-between text-xs md:text-sm text-gray-600 mb-2">
+          <span className="font-medium">Progress</span>
+          <span className="font-medium">{sessionStats.reviewed} / {sessionStats.total}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 rounded-full h-2 md:h-2.5">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-blue-600 h-2 md:h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${(sessionStats.reviewed / sessionStats.total) * 100}%` }}
           ></div>
         </div>
@@ -233,8 +233,11 @@ const FlashcardTab = ({ language }) => {
 
       {/* Flashcard */}
       <div
-        className="relative w-full max-w-lg cursor-pointer"
-        style={{ perspective: '1000px', height: '400px' }}
+        className="relative w-full max-w-lg cursor-pointer touch-manipulation"
+        style={{
+          perspective: '1000px',
+          height: window.innerWidth < 768 ? '350px' : '400px'
+        }}
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div
@@ -248,35 +251,35 @@ const FlashcardTab = ({ language }) => {
         >
           {/* Front of Card */}
           <div
-            className="absolute w-full h-full bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center"
+            className="absolute w-full h-full bg-white rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-center"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
             }}
           >
-            <p className="text-sm text-gray-500 mb-4">Word in {language}</p>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">{currentCard.word}</h2>
+            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">Word in {language}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 md:mb-4 text-center px-4">{currentCard.word}</h2>
             {currentCard.category && (
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                 {currentCard.category}
               </span>
             )}
-            <p className="text-gray-400 mt-8 text-sm">Click to reveal translation</p>
+            <p className="text-gray-400 mt-6 md:mt-8 text-xs md:text-sm">Tap to reveal translation</p>
           </div>
 
           {/* Back of Card */}
           <div
-            className="absolute w-full h-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center text-white"
+            className="absolute w-full h-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-center text-white"
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
           >
-            <p className="text-sm text-blue-100 mb-4">Translation</p>
-            <h2 className="text-4xl font-bold mb-4">{currentCard.translation}</h2>
+            <p className="text-xs md:text-sm text-blue-100 mb-3 md:mb-4">Translation</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-center px-4">{currentCard.translation}</h2>
             {currentCard.example_sentence && (
-              <div className="mt-6 p-4 bg-white bg-opacity-20 rounded-lg max-w-md">
+              <div className="mt-4 md:mt-6 p-3 md:p-4 bg-white bg-opacity-20 rounded-lg max-w-md w-full mx-4">
                 <p className="italic text-sm mb-2">"{currentCard.example_sentence}"</p>
                 {currentCard.example_translation && (
                   <p className="text-xs text-blue-100">{currentCard.example_translation}</p>
@@ -289,45 +292,45 @@ const FlashcardTab = ({ language }) => {
 
       {/* Rating Buttons */}
       {isFlipped && (
-        <div className="w-full max-w-lg mt-8 grid grid-cols-3 gap-4">
+        <div className="w-full max-w-lg mt-6 md:mt-8 grid grid-cols-3 gap-2 md:gap-4 px-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDifficultyRating('hard');
             }}
-            className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg flex flex-col items-center space-y-2 transition-colors"
+            className="p-3 md:p-4 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-lg flex flex-col items-center space-y-1 md:space-y-2 transition-colors touch-manipulation min-h-[88px]"
           >
-            <XCircle className="h-6 w-6" />
-            <span className="font-medium">Hard</span>
-            <span className="text-xs">Review tomorrow</span>
+            <XCircle className="h-6 w-6 md:h-7 md:w-7" />
+            <span className="font-medium text-sm md:text-base">Hard</span>
+            <span className="text-xs hidden sm:inline">Review tomorrow</span>
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDifficultyRating('medium');
             }}
-            className="p-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg flex flex-col items-center space-y-2 transition-colors"
+            className="p-3 md:p-4 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white rounded-lg flex flex-col items-center space-y-1 md:space-y-2 transition-colors touch-manipulation min-h-[88px]"
           >
-            <AlertCircle className="h-6 w-6" />
-            <span className="font-medium">Medium</span>
-            <span className="text-xs">Review in 3 days</span>
+            <AlertCircle className="h-6 w-6 md:h-7 md:w-7" />
+            <span className="font-medium text-sm md:text-base">Medium</span>
+            <span className="text-xs hidden sm:inline">Review in 3 days</span>
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDifficultyRating('easy');
             }}
-            className="p-4 bg-green-500 hover:bg-green-600 text-white rounded-lg flex flex-col items-center space-y-2 transition-colors"
+            className="p-3 md:p-4 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white rounded-lg flex flex-col items-center space-y-1 md:space-y-2 transition-colors touch-manipulation min-h-[88px]"
           >
-            <CheckCircle className="h-6 w-6" />
-            <span className="font-medium">Easy</span>
-            <span className="text-xs">Review in 7+ days</span>
+            <CheckCircle className="h-6 w-6 md:h-7 md:w-7" />
+            <span className="font-medium text-sm md:text-base">Easy</span>
+            <span className="text-xs hidden sm:inline">Review in 7+ days</span>
           </button>
         </div>
       )}
 
       {!isFlipped && (
-        <p className="text-gray-500 text-sm mt-4">Click the card to see the translation</p>
+        <p className="text-gray-500 text-xs md:text-sm mt-4 px-4 text-center">Tap the card to see the translation</p>
       )}
     </div>
   );

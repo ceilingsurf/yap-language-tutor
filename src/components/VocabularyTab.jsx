@@ -102,27 +102,28 @@ const VocabularyTab = ({ language }) => {
   return (
     <div className="flex-1 flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-800">My Vocabulary</h2>
-            <span className="text-sm text-gray-500">({filteredWords.length} words)</span>
+      <div className="bg-white border-b border-gray-200 p-3 md:p-4">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-blue-600 flex-shrink-0" />
+            <h2 className="text-lg md:text-xl font-bold text-gray-800 truncate">My Vocabulary</h2>
+            <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">({filteredWords.length})</span>
           </div>
           <button
             onClick={() => {
               setEditingWord(null);
               setShowAddModal(true);
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+            className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 flex items-center space-x-1 md:space-x-2 text-sm flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span>Add Word</span>
+            <span className="hidden sm:inline">Add Word</span>
+            <span className="sm:hidden">Add</span>
           </button>
         </div>
 
         {/* Search and Filter */}
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -130,13 +131,13 @@ const VocabularyTab = ({ language }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search vocabulary..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             />
           </div>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>
@@ -148,19 +149,19 @@ const VocabularyTab = ({ language }) => {
       </div>
 
       {/* Vocabulary List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading vocabulary...</p>
           </div>
         ) : filteredWords.length === 0 ? (
-          <div className="text-center py-8">
-            <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          <div className="text-center py-8 px-4">
+            <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-2">
               {searchTerm || selectedCategory !== 'all' ? 'No words found' : 'No vocabulary yet'}
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-sm md:text-base text-gray-500 mb-4">
               {searchTerm || selectedCategory !== 'all'
                 ? 'Try adjusting your search or filter'
                 : 'Start adding words to build your vocabulary'}
@@ -168,37 +169,39 @@ const VocabularyTab = ({ language }) => {
             {!searchTerm && selectedCategory === 'all' && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800"
               >
                 Add Your First Word
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {filteredWords.map(word => (
               <div
                 key={word.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md active:shadow-lg transition-shadow"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-800">{word.word}</h3>
-                    <p className="text-sm text-gray-600">{word.translation}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base md:text-lg font-bold text-gray-800 truncate">{word.word}</h3>
+                    <p className="text-sm text-gray-600 truncate">{word.translation}</p>
                   </div>
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-1 flex-shrink-0 ml-2">
                     <button
                       onClick={() => {
                         setEditingWord(word);
                         setShowAddModal(true);
                       }}
-                      className="p-1 hover:bg-gray-100 rounded"
+                      className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded transition-colors"
+                      aria-label="Edit word"
                     >
                       <Edit2 className="h-4 w-4 text-gray-400" />
                     </button>
                     <button
                       onClick={() => deleteWord(word.id)}
-                      className="p-1 hover:bg-gray-100 rounded"
+                      className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded transition-colors"
+                      aria-label="Delete word"
                     >
                       <Trash2 className="h-4 w-4 text-gray-400" />
                     </button>
@@ -307,17 +310,21 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <div className="bg-white rounded-lg max-w-md w-full p-4 md:p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">
+          <h3 className="text-lg md:text-xl font-bold text-gray-800">
             {word ? 'Edit Word' : 'Add New Word'}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 active:text-gray-800 p-2 -mr-2"
+            aria-label="Close"
+          >
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Word (in {language})
@@ -326,7 +333,7 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
               type="text"
               value={formData.word}
               onChange={(e) => setFormData({ ...formData, word: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               required
             />
           </div>
@@ -339,7 +346,7 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
               type="text"
               value={formData.translation}
               onChange={(e) => setFormData({ ...formData, translation: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               required
             />
           </div>
@@ -351,7 +358,7 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             >
               <option value="verbs">Verbs</option>
               <option value="nouns">Nouns</option>
@@ -368,7 +375,7 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
             <textarea
               value={formData.example_sentence}
               onChange={(e) => setFormData({ ...formData, example_sentence: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               rows="2"
             />
           </div>
@@ -380,23 +387,23 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
             <textarea
               value={formData.example_translation}
               onChange={(e) => setFormData({ ...formData, example_translation: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               rows="2"
             />
           </div>
 
-          <div className="flex space-x-3 pt-4">
+          <div className="flex space-x-3 pt-2 md:pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              className="flex-1 px-4 py-2.5 md:py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 active:bg-gray-100 transition-colors text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 transition-colors text-base"
             >
               {saving ? 'Saving...' : word ? 'Update' : 'Add'}
             </button>

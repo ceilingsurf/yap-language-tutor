@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, BookOpen, Target, TrendingUp, MessageSquare, CheckCircle, BarChart3, Languages, Mic, Volume2, Pause, LogOut, Library } from 'lucide-react';
+import { Send, BookOpen, Target, TrendingUp, MessageSquare, CheckCircle, BarChart3, Languages, Mic, Volume2, Pause, LogOut, Library, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import VocabularyTab from './VocabularyTab';
 import FlashcardTab from './FlashcardTab';
+import BottomNavigation from './BottomNavigation';
+import MobileSidebar from './MobileSidebar';
+import { useIsMobile, useIsTablet, useIsDesktop } from '../hooks/useMediaQuery';
 
 const LanguageTutor = () => {
   const { user, signOut } = useAuth();
+
+  // Responsive hooks
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  const isDesktop = useIsDesktop();
+
   const [selectedLanguage, setSelectedLanguage] = useState('spanish');
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -14,6 +23,7 @@ const LanguageTutor = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [voiceSettings, setVoiceSettings] = useState({
     rate: 0.9,
     autoPlay: true
@@ -668,65 +678,77 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pb-16 md:pb-0">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white border-b border-gray-200 p-3 md:p-4 safe-area-pt">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
               <div className="flex items-center space-x-2">
                 <img
                   src="/logo.png"
                   alt="YAP Logo"
-                  className="h-8 w-8 object-contain"
+                  className="h-6 w-6 md:h-8 md:w-8 object-contain flex-shrink-0"
                 />
-                <h1 className="text-xl font-bold text-gray-800">Language Tutor</h1>
+                <h1 className="text-base md:text-xl font-bold text-gray-800 hidden sm:block">Language Tutor</h1>
+                <h1 className="text-base font-bold text-gray-800 sm:hidden">YAP</h1>
               </div>
-              
-              <select 
+
+              <select
                 value={selectedLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm max-w-[140px] md:max-w-none"
               >
                 {Object.entries(languages).map(([code, lang]) => (
                   <option key={code} value={code}>
-                    {lang.flag} {lang.name}
+                    {isMobile ? lang.flag : `${lang.flag} ${lang.name}`}
                   </option>
                 ))}
               </select>
 
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${getProficiencyColor(userProfile.proficiencyLevel)}`}>
-                {userProfile.proficiencyLevel}
-              </div>
+              {!isMobile && (
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${getProficiencyColor(userProfile.proficiencyLevel)}`}>
+                  {userProfile.proficiencyLevel}
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              {activeView === 'chat' && (
+            <div className="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
+              {activeView === 'chat' && !isMobile && (
                 <button
                   onClick={() => setShowLessonMode(!showLessonMode)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-3 md:px-4 py-1.5 md:py-2 rounded-md text-xs md:text-sm font-medium transition-colors ${
                     showLessonMode
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  {showLessonMode ? 'Lesson Mode' : 'Chat Mode'}
+                  {showLessonMode ? 'Lesson' : 'Chat'}
+                </button>
+              )}
+              {activeView === 'chat' && isMobile && (
+                <button
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="p-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                  aria-label="Open settings"
+                >
+                  <Menu className="h-5 w-5" />
                 </button>
               )}
               <button
                 onClick={async () => {
                   await signOut();
                 }}
-                className="px-3 py-2 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors flex items-center space-x-1"
+                className="px-2 md:px-3 py-1.5 md:py-2 rounded-md text-xs md:text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors flex items-center space-x-1"
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="flex border-t border-gray-200 mt-4 -mb-4 -mx-4 px-4">
+          {/* Tab Navigation - Hidden on mobile, shown on tablet+ */}
+          <div className="hidden md:flex border-t border-gray-200 mt-4 -mb-4 -mx-4 px-4">
             <button
               onClick={() => setActiveView('chat')}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -777,17 +799,17 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         ) : (
           <>
             {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
           {messages.length === 0 && (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-4">{languages[selectedLanguage].flag}</div>
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            <div className="text-center py-6 md:py-8 px-4">
+              <div className="text-4xl md:text-5xl mb-4">{languages[selectedLanguage].flag}</div>
+              <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">
                 Ready to practice {languages[selectedLanguage].name}?
               </h2>
-              <p className="text-gray-500 mb-4">
+              <p className="text-sm md:text-base text-gray-500 mb-4">
                 Start a conversation and I'll help you learn with personalized feedback!
               </p>
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center justify-center space-x-2 text-xs md:text-sm text-gray-600">
                 <Mic className="h-4 w-4" />
                 <span>Click the microphone to speak</span>
               </div>
@@ -796,9 +818,9 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
 
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg relative group ${
-                message.sender === 'user' 
-                  ? 'bg-blue-600 text-white' 
+              <div className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2.5 md:py-2 rounded-lg relative group ${
+                message.sender === 'user'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors'
               }`}>
                 {message.sender === 'tutor' && (
@@ -831,8 +853,8 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                     </button>
                   </div>
                 )}
-                <p className="pr-8">
-                  {message.sender === 'tutor' && translatedMessages.has(message.id) 
+                <p className="pr-8 text-base md:text-sm">
+                  {message.sender === 'tutor' && translatedMessages.has(message.id)
                     ? message.englishTranslation || message.text
                     : message.text
                   }
@@ -842,7 +864,7 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
                     English translation
                   </p>
                 )}
-                <p className={`text-xs mt-1 ${
+                <p className={`text-xs mt-1.5 md:mt-1 ${
                   message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                 }`}>
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -869,38 +891,65 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         </div>
 
         {/* Input Area */}
-        <div className="bg-white border-t border-gray-200 p-4">
+        <div className="bg-white border-t border-gray-200 p-3 md:p-4 safe-area-pb">
+          {/* Full-screen listening mode on mobile */}
+          {isListening && isMobile && (
+            <div className="fixed inset-0 bg-blue-600 z-50 flex flex-col items-center justify-center">
+              <div className="text-white text-center">
+                <div className="mb-6">
+                  <div className="w-24 h-24 mx-auto rounded-full bg-white bg-opacity-20 flex items-center justify-center animate-pulse">
+                    <Mic className="h-12 w-12" />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Listening...</h2>
+                <p className="text-blue-100 mb-8">Speak in {languages[selectedLanguage].name}</p>
+                <button
+                  onClick={stopListening}
+                  className="px-6 py-3 bg-white text-blue-600 rounded-full font-medium hover:bg-blue-50 transition-colors"
+                >
+                  Stop Listening
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex space-x-2">
             <button
               onClick={isListening ? stopListening : startListening}
               disabled={isLoading}
-              className={`p-3 rounded-md transition-colors ${
-                isListening 
-                  ? 'bg-red-500 text-white animate-pulse' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`p-3 md:p-3 rounded-md transition-colors flex-shrink-0 ${
+                isListening
+                  ? 'bg-red-500 text-white animate-pulse'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
+              } disabled:opacity-50 disabled:cursor-not-allowed ${
+                isMobile ? 'w-14 h-14 rounded-full' : ''
+              }`}
               title={isListening ? 'Listening...' : 'Click to speak'}
+              aria-label={isListening ? 'Stop listening' : 'Start voice input'}
             >
-              <Mic className="h-5 w-5" />
+              <Mic className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'}`} />
             </button>
             <input
               type="text"
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder={`Type your message in ${languages[selectedLanguage].name}...`}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder={isMobile ? 'Type message...' : `Type your message in ${languages[selectedLanguage].name}...`}
+              className="flex-1 px-3 md:px-4 py-2 md:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
               disabled={isLoading || isListening}
             />
             <button
               onClick={sendMessage}
               disabled={isLoading || !currentMessage.trim() || isListening}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className={`px-3 md:px-4 py-2 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0 ${
+                isMobile ? 'w-14 h-14 rounded-full flex items-center justify-center' : ''
+              }`}
+              aria-label="Send message"
             >
-              <Send className="h-5 w-5" />
+              <Send className={`${isMobile ? 'h-6 w-6' : 'h-5 w-5'}`} />
             </button>
           </div>
-          {isListening && (
+          {isListening && !isMobile && (
             <p className="text-sm text-red-600 mt-2 flex items-center">
               <span className="animate-pulse mr-2">●</span>
               Listening...
@@ -911,8 +960,8 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         )}
       </div>
 
-      {/* Sidebar - Only show in chat mode */}
-      {activeView === 'chat' && (
+      {/* Sidebar - Only show in chat mode on desktop */}
+      {activeView === 'chat' && isDesktop && (
         <div className="w-80 bg-white border-l border-gray-200 flex flex-col overflow-y-auto">
         {/* Voice Settings */}
         <div className="p-4 border-b border-gray-200">
@@ -1101,6 +1150,26 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
         </div>
       </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNavigation
+        activeView={activeView}
+        onViewChange={setActiveView}
+      />
+
+      {/* Mobile Sidebar */}
+      <MobileSidebar
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+        voiceSettings={voiceSettings}
+        setVoiceSettings={setVoiceSettings}
+        userProfile={userProfile}
+        learningGoals={learningGoals}
+        toggleGoalCompletion={toggleGoalCompletion}
+        addCustomGoal={addCustomGoal}
+        feedback={feedback}
+        progressStats={progressStats}
+      />
     </div>
   );
 };
