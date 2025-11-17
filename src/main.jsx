@@ -6,6 +6,11 @@ import { ThemeProvider } from './context/ThemeContext.jsx';
 import { registerServiceWorker } from './utils/registerSW.js';
 import './index.css';
 
+// Debug: Check environment variables
+console.log('🔍 DEBUG: main.jsx loaded');
+console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Using fallback');
+console.log('Supabase Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Using fallback');
+
 // Register service worker for PWA
 registerServiceWorker();
 
