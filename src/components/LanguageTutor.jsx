@@ -784,7 +784,11 @@ Your entire response MUST be valid JSON only. DO NOT include any text outside th
               {activeView === 'chat' && isMobile && (
                 <button
                   onClick={() => setIsMobileSidebarOpen(true)}
-                  className="p-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                  className={`p-2 rounded-md transition-colors ${
+                    isDark
+                      ? 'bg-dark-border text-dark-text hover:bg-dark-accent hover:text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                   aria-label="Open settings"
                 >
                   <Menu className="h-5 w-5" />
