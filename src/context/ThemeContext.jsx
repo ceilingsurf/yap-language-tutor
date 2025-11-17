@@ -14,6 +14,8 @@ export const ThemeProvider = ({ children }) => {
   const [themeMode, setThemeMode] = useState('auto'); // 'auto', 'light', 'dark'
   const [effectiveTheme, setEffectiveTheme] = useState('light');
 
+  console.log('🔍 DEBUG ThemeContext render:', { themeMode, effectiveTheme });
+
   // Get system preference
   const getSystemTheme = () => {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

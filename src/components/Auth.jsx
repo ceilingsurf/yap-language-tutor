@@ -15,6 +15,9 @@ const Auth = () => {
   const { signIn, signUp } = useAuth();
   const { isDark } = useTheme();
 
+  // Debug logging
+  console.log('🔍 DEBUG Auth.jsx render:', { isLogin, isDark });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -38,9 +41,12 @@ const Auth = () => {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${
-      isDark ? 'bg-gradient-to-br from-dark-bg to-dark-surface' : 'bg-gradient-to-br from-blue-50 to-indigo-100'
-    }`}>
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 ${
+        isDark ? 'bg-gradient-to-br from-dark-bg to-dark-surface' : 'bg-gradient-to-br from-blue-50 to-indigo-100'
+      }`}
+      style={{ backgroundColor: '#3b82f6' }} // DEBUG: Force visible blue background
+    >
       <div className={`rounded-lg shadow-xl w-full max-w-md p-8 ${isDark ? 'bg-dark-surface' : 'bg-white'}`}>
         {/* Logo and Title */}
         <div className="flex flex-col items-center mb-8">

@@ -17,17 +17,26 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔍 DEBUG AuthContext: Initializing...');
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        console.log('🔍 DEBUG AuthContext: Session retrieved:', !!session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('🔍 DEBUG AuthContext: Error getting session:', error);
+        setLoading(false);
+      });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('🔍 DEBUG AuthContext: Auth state changed:', _event, !!session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
