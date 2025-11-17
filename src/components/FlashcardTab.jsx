@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { RotateCcw, CheckCircle, XCircle, AlertCircle, BookOpen, Trophy } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const FlashcardTab = ({ language }) => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [vocabularyWords, setVocabularyWords] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -147,10 +149,10 @@ const FlashcardTab = ({ language }) => {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50">
+      <div className={`flex-1 flex items-center justify-center ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading flashcards...</p>
+          <p className={isDark ? 'text-dark-text-secondary' : 'text-gray-600'}>Loading flashcards...</p>
         </div>
       </div>
     );
@@ -158,13 +160,15 @@ const FlashcardTab = ({ language }) => {
 
   if (showResults || vocabularyWords.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 p-3 md:p-4">
-        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 max-w-md w-full text-center">
+      <div className={`flex-1 flex items-center justify-center p-3 md:p-4 ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
+        <div className={`rounded-lg shadow-lg p-6 md:p-8 max-w-md w-full text-center ${
+          isDark ? 'bg-dark-surface' : 'bg-white'
+        }`}>
           {vocabularyWords.length === 0 ? (
             <>
-              <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-2">No Cards to Review</h3>
-              <p className="text-sm md:text-base text-gray-600 mb-6">
+              <BookOpen className={`h-12 w-12 md:h-16 md:w-16 mx-auto mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-300'}`} />
+              <h3 className={`text-lg md:text-xl font-bold mb-2 ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>No Cards to Review</h3>
+              <p className={`text-sm md:text-base mb-6 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
                 You're all caught up! Add more vocabulary words or come back later when cards are due for review.
               </p>
               <button
@@ -177,13 +181,13 @@ const FlashcardTab = ({ language }) => {
           ) : (
             <>
               <Trophy className="h-12 w-12 md:h-16 md:w-16 text-yellow-500 mx-auto mb-4" />
-              <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Session Complete!</h3>
-              <p className="text-sm md:text-base text-gray-600 mb-6">Great job reviewing your vocabulary!</p>
+              <h3 className={`text-xl md:text-2xl font-bold mb-2 ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>Session Complete!</h3>
+              <p className={`text-sm md:text-base mb-6 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>Great job reviewing your vocabulary!</p>
 
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                  <span className="text-gray-700">Cards Reviewed:</span>
-                  <span className="font-bold text-gray-900">{sessionStats.reviewed}</span>
+                <div className={`flex justify-between items-center p-3 rounded ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
+                  <span className={isDark ? 'text-dark-text' : 'text-gray-700'}>Cards Reviewed:</span>
+                  <span className={`font-bold ${isDark ? 'text-dark-text' : 'text-gray-900'}`}>{sessionStats.reviewed}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-green-50 rounded">
                   <span className="text-green-700">Easy:</span>
@@ -216,14 +220,16 @@ const FlashcardTab = ({ language }) => {
   const currentCard = vocabularyWords[currentCardIndex];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-3 md:p-4">
+    <div className={`flex-1 flex flex-col items-center justify-center p-3 md:p-4 ${
+      isDark ? 'bg-dark-bg' : 'bg-gradient-to-br from-blue-50 to-indigo-100'
+    }`}>
       {/* Progress Bar */}
       <div className="w-full max-w-2xl mb-4 md:mb-6 px-2">
-        <div className="flex justify-between text-xs md:text-sm text-gray-600 mb-2">
+        <div className={`flex justify-between text-xs md:text-sm mb-2 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>
           <span className="font-medium">Progress</span>
           <span className="font-medium">{sessionStats.reviewed} / {sessionStats.total}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 md:h-2.5">
+        <div className={`w-full rounded-full h-2 md:h-2.5 ${isDark ? 'bg-dark-border' : 'bg-gray-200'}`}>
           <div
             className="bg-blue-600 h-2 md:h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${(sessionStats.reviewed / sessionStats.total) * 100}%` }}
@@ -251,20 +257,22 @@ const FlashcardTab = ({ language }) => {
         >
           {/* Front of Card */}
           <div
-            className="absolute w-full h-full bg-white rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-center"
+            className={`absolute w-full h-full rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col items-center justify-center ${
+              isDark ? 'bg-dark-surface' : 'bg-white'
+            }`}
             style={{
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
             }}
           >
-            <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">Word in {language}</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 md:mb-4 text-center px-4">{currentCard.word}</h2>
+            <p className={`text-xs md:text-sm mb-3 md:mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>Word in {language}</p>
+            <h2 className={`text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-center px-4 ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>{currentCard.word}</h2>
             {currentCard.category && (
               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                 {currentCard.category}
               </span>
             )}
-            <p className="text-gray-400 mt-6 md:mt-8 text-xs md:text-sm">Tap to reveal translation</p>
+            <p className={`mt-6 md:mt-8 text-xs md:text-sm ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`}>Tap to reveal translation</p>
           </div>
 
           {/* Back of Card */}
@@ -330,7 +338,7 @@ const FlashcardTab = ({ language }) => {
       )}
 
       {!isFlipped && (
-        <p className="text-gray-500 text-xs md:text-sm mt-4 px-4 text-center">Tap the card to see the translation</p>
+        <p className={`text-xs md:text-sm mt-4 px-4 text-center ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>Tap the card to see the translation</p>
       )}
     </div>
   );

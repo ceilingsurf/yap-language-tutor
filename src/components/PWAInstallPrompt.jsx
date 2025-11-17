@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Download, Smartphone } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const PWAInstallPrompt = () => {
+  const { isDark } = useTheme();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -93,27 +95,29 @@ const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50">
-      <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 animate-slide-up">
+      <div className={`rounded-lg shadow-2xl border p-4 animate-slide-up ${
+        isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'
+      }`}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
             <div className="bg-blue-100 p-2 rounded-lg">
               <Smartphone className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">Install App</h3>
-              <p className="text-xs text-gray-600">Add to home screen</p>
+              <h3 className={`font-bold ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>Install App</h3>
+              <p className={`text-xs ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>Add to home screen</p>
             </div>
           </div>
           <button
             onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600"
+            className={isDark ? 'text-dark-text-secondary hover:text-dark-text' : 'text-gray-400 hover:text-gray-600'}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {isIOS ? (
-          <div className="text-sm text-gray-700 space-y-2">
+          <div className={`text-sm space-y-2 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
             <p>To install this app on your iPhone:</p>
             <ol className="list-decimal list-inside space-y-1 text-xs">
               <li>Tap the Share button (
@@ -128,7 +132,7 @@ const PWAInstallPrompt = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-gray-700">
+            <p className={`text-sm ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Install the app for a better experience with offline support and quick access.
             </p>
             <div className="flex space-x-2">
@@ -141,7 +145,9 @@ const PWAInstallPrompt = () => {
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium"
+                className={`px-4 py-2 text-sm font-medium ${
+                  isDark ? 'text-dark-text-secondary hover:text-dark-text' : 'text-gray-600 hover:text-gray-800'
+                }`}
               >
                 Not now
               </button>

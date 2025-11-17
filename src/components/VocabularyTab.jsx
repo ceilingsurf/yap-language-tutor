@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, Search, Star, Trash2, Edit2, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const VocabularyTab = ({ language }) => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [vocabularyWords, setVocabularyWords] = useState([]);
   const [filteredWords, setFilteredWords] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,14 +102,14 @@ const VocabularyTab = ({ language }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-gray-50">
+    <div className={`flex-1 flex flex-col overflow-hidden ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-3 md:p-4">
+      <div className={`border-b p-3 md:p-4 ${isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'}`}>
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <div className="flex items-center space-x-2 flex-1 min-w-0">
             <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-blue-600 flex-shrink-0" />
-            <h2 className="text-lg md:text-xl font-bold text-gray-800 truncate">My Vocabulary</h2>
-            <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">({filteredWords.length})</span>
+            <h2 className={`text-lg md:text-xl font-bold truncate ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>My Vocabulary</h2>
+            <span className={`text-xs md:text-sm flex-shrink-0 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>({filteredWords.length})</span>
           </div>
           <button
             onClick={() => {
@@ -125,19 +127,27 @@ const VocabularyTab = ({ language }) => {
         {/* Search and Filter */}
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search vocabulary..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+              }`}
             />
           </div>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+            className={`px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+              isDark
+                ? 'bg-dark-bg border-dark-border text-dark-text'
+                : 'border-gray-300 bg-white text-gray-900'
+            }`}
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>
@@ -153,15 +163,15 @@ const VocabularyTab = ({ language }) => {
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading vocabulary...</p>
+            <p className={isDark ? 'text-dark-text-secondary' : 'text-gray-600'}>Loading vocabulary...</p>
           </div>
         ) : filteredWords.length === 0 ? (
           <div className="text-center py-8 px-4">
-            <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-2">
+            <BookOpen className={`h-12 w-12 md:h-16 md:w-16 mx-auto mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-300'}`} />
+            <h3 className={`text-base md:text-lg font-semibold mb-2 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               {searchTerm || selectedCategory !== 'all' ? 'No words found' : 'No vocabulary yet'}
             </h3>
-            <p className="text-sm md:text-base text-gray-500 mb-4">
+            <p className={`text-sm md:text-base mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>
               {searchTerm || selectedCategory !== 'all'
                 ? 'Try adjusting your search or filter'
                 : 'Start adding words to build your vocabulary'}
@@ -180,12 +190,14 @@ const VocabularyTab = ({ language }) => {
             {filteredWords.map(word => (
               <div
                 key={word.id}
-                className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md active:shadow-lg transition-shadow"
+                className={`border rounded-lg p-3 md:p-4 hover:shadow-md active:shadow-lg transition-shadow ${
+                  isDark ? 'bg-dark-surface border-dark-border' : 'bg-white border-gray-200'
+                }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base md:text-lg font-bold text-gray-800 truncate">{word.word}</h3>
-                    <p className="text-sm text-gray-600 truncate">{word.translation}</p>
+                    <h3 className={`text-base md:text-lg font-bold truncate ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>{word.word}</h3>
+                    <p className={`text-sm truncate ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>{word.translation}</p>
                   </div>
                   <div className="flex space-x-1 flex-shrink-0 ml-2">
                     <button
@@ -193,17 +205,21 @@ const VocabularyTab = ({ language }) => {
                         setEditingWord(word);
                         setShowAddModal(true);
                       }}
-                      className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded transition-colors"
+                      className={`p-2 rounded transition-colors ${
+                        isDark ? 'hover:bg-dark-border' : 'hover:bg-gray-100 active:bg-gray-200'
+                      }`}
                       aria-label="Edit word"
                     >
-                      <Edit2 className="h-4 w-4 text-gray-400" />
+                      <Edit2 className={`h-4 w-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
                     </button>
                     <button
                       onClick={() => deleteWord(word.id)}
-                      className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded transition-colors"
+                      className={`p-2 rounded transition-colors ${
+                        isDark ? 'hover:bg-dark-border' : 'hover:bg-gray-100 active:bg-gray-200'
+                      }`}
                       aria-label="Delete word"
                     >
-                      <Trash2 className="h-4 w-4 text-gray-400" />
+                      <Trash2 className={`h-4 w-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
                     </button>
                   </div>
                 </div>
@@ -215,10 +231,10 @@ const VocabularyTab = ({ language }) => {
                 )}
 
                 {word.example_sentence && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
-                    <p className="text-gray-700 italic">"{word.example_sentence}"</p>
+                  <div className={`mt-2 p-2 rounded text-sm ${isDark ? 'bg-dark-bg' : 'bg-gray-50'}`}>
+                    <p className={`italic ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>"{word.example_sentence}"</p>
                     {word.example_translation && (
-                      <p className="text-gray-500 text-xs mt-1">{word.example_translation}</p>
+                      <p className={`text-xs mt-1 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>{word.example_translation}</p>
                     )}
                   </div>
                 )}
@@ -256,6 +272,7 @@ const VocabularyTab = ({ language }) => {
 // Add Word Modal Component
 const AddWordModal = ({ word, language, onClose, onSave }) => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [formData, setFormData] = useState({
     word: word?.word || '',
     translation: word?.translation || '',
@@ -310,14 +327,16 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-4 md:p-6 max-h-[90vh] overflow-y-auto">
+      <div className={`rounded-lg max-w-md w-full p-4 md:p-6 max-h-[90vh] overflow-y-auto ${
+        isDark ? 'bg-dark-surface' : 'bg-white'
+      }`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg md:text-xl font-bold text-gray-800">
+          <h3 className={`text-lg md:text-xl font-bold ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>
             {word ? 'Edit Word' : 'Add New Word'}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 active:text-gray-800 p-2 -mr-2"
+            className={`p-2 -mr-2 ${isDark ? 'text-dark-text-secondary hover:text-dark-text' : 'text-gray-400 hover:text-gray-600 active:text-gray-800'}`}
             aria-label="Close"
           >
             <X className="h-6 w-6" />
@@ -326,39 +345,51 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
 
         <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Word (in {language})
             </label>
             <input
               type="text"
               value={formData.word}
               onChange={(e) => setFormData({ ...formData, word: e.target.value })}
-              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Translation (English)
             </label>
             <input
               type="text"
               value={formData.translation}
               onChange={(e) => setFormData({ ...formData, translation: e.target.value })}
-              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Category
             </label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             >
               <option value="verbs">Verbs</option>
               <option value="nouns">Nouns</option>
@@ -369,25 +400,33 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Example Sentence (Optional)
             </label>
             <textarea
               value={formData.example_sentence}
               onChange={(e) => setFormData({ ...formData, example_sentence: e.target.value })}
-              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               rows="2"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-dark-text' : 'text-gray-700'}`}>
               Example Translation (Optional)
             </label>
             <textarea
               value={formData.example_translation}
               onChange={(e) => setFormData({ ...formData, example_translation: e.target.value })}
-              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              className={`w-full px-3 md:px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base ${
+                isDark
+                  ? 'bg-dark-bg border-dark-border text-dark-text placeholder-dark-text-secondary'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               rows="2"
             />
           </div>
@@ -396,7 +435,11 @@ const AddWordModal = ({ word, language, onClose, onSave }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 md:py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 active:bg-gray-100 transition-colors text-base"
+              className={`flex-1 px-4 py-2.5 md:py-2 border rounded-md transition-colors text-base ${
+                isDark
+                  ? 'border-dark-border text-dark-text hover:bg-dark-border'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+              }`}
             >
               Cancel
             </button>
