@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCcw, CheckCircle, XCircle, AlertCircle, BookOpen, Trophy } from 'lucide-react';
+import { RotateCcw, CheckCircle, XCircle, AlertCircle, BookOpen, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import useVoice from '../hooks/useVoice';
 
 const FlashcardTab = ({ language }) => {
   const { user } = useAuth();
   const { isDark } = useTheme();
+  const { isSpeaking, speakingId, toggleSpeak } = useVoice({ rate: 0.9 });
   const [vocabularyWords, setVocabularyWords] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -265,6 +267,24 @@ const FlashcardTab = ({ language }) => {
               WebkitBackfaceVisibility: 'hidden',
             }}
           >
+            {/* Voice button for front */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSpeak(currentCard.word, language, `front-${currentCard.id}`);
+              }}
+              className={`absolute top-4 right-4 p-3 rounded-full transition-all ${
+                isDark ? 'bg-dark-bg hover:bg-dark-border' : 'bg-gray-100 hover:bg-gray-200'
+              } ${isSpeaking && speakingId === `front-${currentCard.id}` ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
+              aria-label={isSpeaking && speakingId === `front-${currentCard.id}` ? 'Stop speaking' : 'Speak word'}
+            >
+              {isSpeaking && speakingId === `front-${currentCard.id}` ? (
+                <VolumeX className={`h-5 w-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              ) : (
+                <Volume2 className={`h-5 w-5 ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`} />
+              )}
+            </button>
+
             <p className={`text-xs md:text-sm mb-3 md:mb-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-500'}`}>Word in {language}</p>
             <h2 className={`text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-center px-4 ${isDark ? 'text-dark-text' : 'text-gray-800'}`}>{currentCard.word}</h2>
             {currentCard.category && (
@@ -284,6 +304,24 @@ const FlashcardTab = ({ language }) => {
               transform: 'rotateY(180deg)',
             }}
           >
+            {/* Voice button for back - speaks the word again */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSpeak(currentCard.word, language, `back-${currentCard.id}`);
+              }}
+              className={`absolute top-4 right-4 p-3 rounded-full transition-all ${
+                isSpeaking && speakingId === `back-${currentCard.id}` ? 'bg-blue-800' : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+              }`}
+              aria-label={isSpeaking && speakingId === `back-${currentCard.id}` ? 'Stop speaking' : 'Speak word'}
+            >
+              {isSpeaking && speakingId === `back-${currentCard.id}` ? (
+                <VolumeX className="h-5 w-5 text-blue-200" />
+              ) : (
+                <Volume2 className="h-5 w-5 text-white" />
+              )}
+            </button>
+
             <p className="text-xs md:text-sm text-blue-100 mb-3 md:mb-4">Translation</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-3 md:mb-4 text-center px-4">{currentCard.translation}</h2>
             {currentCard.example_sentence && (

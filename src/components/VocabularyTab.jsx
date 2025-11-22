@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus, Search, Star, Trash2, Edit2, X } from 'lucide-react';
+import { BookOpen, Plus, Search, Star, Trash2, Edit2, X, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import useVoice from '../hooks/useVoice';
 
 const VocabularyTab = ({ language }) => {
   const { user } = useAuth();
   const { isDark } = useTheme();
+  const { isSpeaking, speakingId, toggleSpeak } = useVoice({ rate: 0.9 });
   const [vocabularyWords, setVocabularyWords] = useState([]);
   const [filteredWords, setFilteredWords] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -200,6 +202,19 @@ const VocabularyTab = ({ language }) => {
                     <p className={`text-sm truncate ${isDark ? 'text-dark-text-secondary' : 'text-gray-600'}`}>{word.translation}</p>
                   </div>
                   <div className="flex space-x-1 flex-shrink-0 ml-2">
+                    <button
+                      onClick={() => toggleSpeak(word.word, language, word.id)}
+                      className={`p-2 rounded transition-colors ${
+                        isDark ? 'hover:bg-dark-border' : 'hover:bg-gray-100 active:bg-gray-200'
+                      } ${isSpeaking && speakingId === word.id ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
+                      aria-label={isSpeaking && speakingId === word.id ? 'Stop speaking' : 'Speak word'}
+                    >
+                      {isSpeaking && speakingId === word.id ? (
+                        <VolumeX className={`h-4 w-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                      ) : (
+                        <Volume2 className={`h-4 w-4 ${isDark ? 'text-dark-text-secondary' : 'text-gray-400'}`} />
+                      )}
+                    </button>
                     <button
                       onClick={() => {
                         setEditingWord(word);
